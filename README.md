@@ -13,7 +13,8 @@ After you have both of these things run the application via `ExportViewUtility.e
 # Configuration
 
 Here is an example configuration file
-`
+
+```
 {
     "crmConnectionString":"crm connection string",
     "fetchXmlFile":"fetchfile.xml",
@@ -39,6 +40,7 @@ Here is an example configuration file
     "fileName":"NameOfFile.csv",
     "body":"Body of the email"
 }
-`
+```
+
 # Contributing
 Contributions are welcome via pull requests (Improving this README is a real easy. Hint, Hint)
