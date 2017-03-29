@@ -37,6 +37,7 @@ namespace ExportViewUtility
             //Connect to CRM
             CrmServiceClient service = new CrmServiceClient(config.crmConnectionString);
 
+
             //Get the query
 
             //If it was supplied then use it if not load the file
@@ -100,8 +101,20 @@ namespace ExportViewUtility
                     //If the entity contains the value insert it. If not then insert a blank value
                     if (e.Contains(c.field))
                     {
+                        object value;
+
+                        //If it is an aliased field then cast that value
+                        if (e[c.field] is AliasedValue)
+                        {
+                            value = ((AliasedValue)e[c.field]).Value;
+                        }
+                        else
+                        {
+                            value = e[c.field];
+                        }
+
                         //Add the quoted row
-                        row.Add($@"""{e[c.field].ToString()}""");
+                        row.Add($@"""{value.ToString()}""");
                     }
                     else
                     {
