@@ -113,6 +113,11 @@ namespace ExportViewUtility
                             value = e[c.field];
                         }
 
+                        if (value is EntityReference)
+                        {
+                            value = ((EntityReference)value).Name;
+                        }
+
                         //Add the quoted row
                         row.Add($@"""{value.ToString()}""");
                     }
