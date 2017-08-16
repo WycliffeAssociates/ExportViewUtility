@@ -17,5 +17,6 @@ namespace ExportViewUtility.Models
         public string subject;
         public string fileName;
         public string body;
+        public bool skipIfEmpty;
     }
 }
