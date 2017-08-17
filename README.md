@@ -18,6 +18,7 @@ Here is an example configuration file
 {
     "crmConnectionString":"crm connection string",
     "fetchXmlFile":"fetchfile.xml",
+    "skipIfEmpty": true //True will prevent the email from being sent if the result is empty
     "columnMapping":[
         {
             "field":"fieldOne",
