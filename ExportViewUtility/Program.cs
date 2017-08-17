@@ -64,9 +64,10 @@ namespace ExportViewUtility
             FetchExpression fetchQuery = new FetchExpression(query);
             EntityCollection result = service.RetrieveMultiple(fetchQuery);
 
-            if (result.Entities.Count == 0)
+            // If no results are returned and the config states that we should skip it then we don't need to do anything else
+            if (result.Entities.Count == 0 && config.skipIfEmpty)
             {
-                Console.WriteLine($"The result didn't return any records");
+                return;
             }
 
             //Generate List
