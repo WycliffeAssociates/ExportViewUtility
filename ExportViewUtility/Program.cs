@@ -120,7 +120,14 @@ namespace ExportViewUtility
                         }
 
                         //Add the quoted row
-                        row.Add($@"""{value.ToString()}""");
+                        if (value == null)
+                        {
+                            row.Add(@"""""");
+                        }
+                        else
+                        {
+                            row.Add($@"""{value.ToString()}""");
+                        }
                     }
                     else
                     {
