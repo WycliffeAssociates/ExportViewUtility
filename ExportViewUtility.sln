@@ -1,8 +1,10 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExportViewUtilityCore", "ExportViewUtilityCore\ExportViewUtilityCore.csproj", "{20effb2a-f825-40b9-9ac6-1914c66ca4d9}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExportViewUtility", "ExportViewUtility\ExportViewUtility.csproj", "{EA14C6EB-589B-4371-A5B8-016C6CDBD2AE}"
 EndProject
 Global

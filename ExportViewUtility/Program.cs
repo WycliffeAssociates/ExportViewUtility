@@ -1,22 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
 using ExportViewUtility.Models;
 using System.IO;
 using System.Net.Mail;
-using Microsoft.Xrm.Tooling.Connector;
+using Microsoft.PowerPlatform.Dataverse.Client;
 using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Sdk;
 using System.Net;
+using System.Text.Json;
 
 namespace ExportViewUtility
 {
-    class Program
+    internal static class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             //Check to see if the configuration file exists
             if (args.Length == 0)
@@ -26,16 +23,16 @@ namespace ExportViewUtility
             }
             if (!File.Exists(args[0]))
             {
-                Console.WriteLine($"Configuration File {args[0]} wasn't found");
+                Console.WriteLine("Configuration File {0} wasn't found", args[0]);
                 return;
             }
 
             //Load configuration File
 
-            Configuration config = JsonConvert.DeserializeObject<Configuration>(File.ReadAllText(args[0]));
+            var config = JsonSerializer.Deserialize<Configuration>(File.OpenRead(args[0]));
 
             //Connect to CRM
-            CrmServiceClient service = new CrmServiceClient(config.crmConnectionString);
+            var service = new ServiceClient(config.crmConnectionString);
 
 
             //Get the query
@@ -51,7 +48,7 @@ namespace ExportViewUtility
                 //Make sure the file that is supplied actually exists
                 if (!File.Exists(config.fetchXmlFile))
                 {
-                    Console.WriteLine($"FetchXml File: {config.fetchXmlFile} wasn't found");
+                    Console.WriteLine("FetchXml File: {0} wasn't found", config.fetchXmlFile);
                     return;
                 }
 
@@ -61,8 +58,8 @@ namespace ExportViewUtility
             //Query CRM
             Console.WriteLine("Querying CRM");
 
-            FetchExpression fetchQuery = new FetchExpression(query);
-            EntityCollection result = service.RetrieveMultiple(fetchQuery);
+            var fetchQuery = new FetchExpression(query);
+            var result = service.RetrieveMultiple(fetchQuery);
 
             // If no results are returned and the config states that we should skip it then we don't need to do anything else
             if (result.Entities.Count == 0 && config.skipIfEmpty)
@@ -75,8 +72,8 @@ namespace ExportViewUtility
             Console.WriteLine("Writing File");
 
             //Get the labels
-            List<string> headerLabels = new List<string>();
-            foreach (ColumnMapping i in config.columnMapping)
+            var headerLabels = new List<string>();
+            foreach (var i in config.columnMapping)
             {
                 //Quote the labels so that they load into the csv correctly
                 headerLabels.Add($@"""{i.label}""");
@@ -84,20 +81,18 @@ namespace ExportViewUtility
 
             //Create file
             //I'm using Memory stream so that I don't actually have to write the file to disk
-            MemoryStream tempFile = new MemoryStream();
-            StreamWriter writer = new StreamWriter(tempFile);
+            var tempFile = new MemoryStream();
+            var writer = new StreamWriter(tempFile);
 
             //Write header
             writer.WriteLine(string.Join(",",headerLabels));
 
-            List<string> row;
-
-            foreach (Entity e in result.Entities)
+            foreach (var e in result.Entities)
             {
                 //Clear the row
-                row = new List<string>();
+                var row = new List<string>();
 
-                foreach (ColumnMapping c in config.columnMapping)
+                foreach (var c in config.columnMapping)
                 {
                     //If the entity contains the value insert it. If not then insert a blank value
                     if (e.Contains(c.field))
@@ -105,29 +100,22 @@ namespace ExportViewUtility
                         object value;
 
                         //If it is an aliased field then cast that value
-                        if (e[c.field] is AliasedValue)
+                        if (e[c.field] is AliasedValue aliasedValue)
                         {
-                            value = ((AliasedValue)e[c.field]).Value;
+                            value = aliasedValue.Value;
                         }
                         else
                         {
                             value = e[c.field];
                         }
 
-                        if (value is EntityReference)
+                        if (value is EntityReference reference)
                         {
-                            value = ((EntityReference)value).Name;
+                            value = reference.Name;
                         }
 
                         //Add the quoted row
-                        if (value == null)
-                        {
-                            row.Add(@"""""");
-                        }
-                        else
-                        {
-                            row.Add($@"""{value.ToString()}""");
-                        }
+                        row.Add(value == null ? @"""""" : $@"""{value}""");
                     }
                     else
                     {
@@ -148,16 +136,16 @@ namespace ExportViewUtility
             //Email list
 
             //Initialize smtp client
-            SmtpClient client = new SmtpClient(config.mailServer.host,config.mailServer.port);
+            var client = new SmtpClient(config.mailServer.host,config.mailServer.port);
             client.Credentials = new NetworkCredential(config.mailServer.userName, config.mailServer.password);
             client.EnableSsl = true;
 
             //Create the mail message
-            MailMessage message = new MailMessage();
+            var message = new MailMessage();
             message.From = new MailAddress(config.mailServer.emailAddress);
 
             //Add all the to messages
-            foreach (string i in config.emailAddress)
+            foreach (var i in config.emailAddress)
             {
                 message.To.Add(new MailAddress(i));
             }
@@ -168,7 +156,7 @@ namespace ExportViewUtility
             message.Attachments.Add(new Attachment(tempFile, config.fileName));
 
             //Send the message
-            Console.WriteLine("Sending file to " + string.Join(",", config.emailAddress));
+            Console.WriteLine("Sending file to {0}", string.Join(",", config.emailAddress));
             client.Send(message);
 
         }

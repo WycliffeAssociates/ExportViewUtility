@@ -1,22 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace ExportViewUtility.Models
 {
     public class Configuration
     {
-        public string crmConnectionString;
-        public string fetchXml;
-        public string fetchXmlFile;
-        public List<ColumnMapping> columnMapping;
-        public List<string> emailAddress;
-        public MailConfiguration mailServer;
-        public string subject;
-        public string fileName;
-        public string body;
-        public bool skipIfEmpty;
+        public string crmConnectionString { get; set; }
+        public string fetchXml { get; set; }
+        public string fetchXmlFile { get; set; }
+        public List<ColumnMapping> columnMapping { get; set; }
+        public List<string> emailAddress { get; set; }
+        public MailConfiguration mailServer { get; set; }
+        public string subject { get; set; }
+        public string fileName { get; set; }
+        public string body { get; set; }
+        public bool skipIfEmpty { get; set; }
     }
 }
